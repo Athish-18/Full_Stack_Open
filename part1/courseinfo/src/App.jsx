@@ -204,49 +204,100 @@
 // Version 1: Accessing values directly from the props object
 // props is a single object that contains all passed values
 
-import { useState } from "react";
-const Statistics = (props) => {
-  const all = props.good + props.neutral + props.bad;
-  console.log(props.allClick);
+// import { useState } from "react";
+// const Statistics = (props) => {
+//   const all = props.good + props.neutral + props.bad;
+//   console.log(props.allClick);
 
-  if (props.allClick.length === 0) {
-    return (
-      <>
-        <h1>Statistics</h1>
-        <p>No Feedback Given</p>
-      </>
-    );
-  } else {
-    return (
-      <>
-        <h1>Statistics</h1>
-        {/* 
+//   if (props.allClick.length === 0) {
+//     return (
+//       <>
+//         <h1>Statistics</h1>
+//         <p>No Feedback Given</p>
+//       </>
+//     );
+//   } else {
+//     return (
+//       <>
+//         <h1>Statistics</h1>
+//         {/* 
 
-        {/* Accessing values using props.key */}
-        <p>Good {props.good}</p>
-        <p>Neutral {props.neutral}</p>
-        <p>Bad {props.bad}</p>
+//         {/* Accessing values using props.key */}
+//         <p>Good {props.good}</p>
+//         <p>Neutral {props.neutral}</p>
+//         <p>Bad {props.bad}</p>
 
-        <p>All {all}</p>
-        <p>Average {all === 0 ? 0 : (props.good - props.bad) / all}</p>
-        <p>Positive {all === 0 ? 0 : (props.good / all) * 100} %</p>
-      </>
-    );
-  }
-}
+//         <p>All {all}</p>
+//         <p>Average {all === 0 ? 0 : (props.good - props.bad) / all}</p>
+//         <p>Positive {all === 0 ? 0 : (props.good / all) * 100} %</p>
+//       </>
+//     );
+//   }
+// }
 
   
 
+// const App = () => {
+//   const [good, setGood] = useState(0);
+//   const [neutral, setNeutral] = useState(0);
+//   const [bad, setBad] = useState(0);
+//   const [allClick,setClick]=useState([]);
+
+//   const handleGood=()=>{
+//     setGood(good+1);
+//     setClick(allClick+1);
+//   }
+
+//   const handleNeutral = () => {
+//     setNeutral(neutral + 1);
+//     setClick(allClick + 1);
+//   };
+
+//   const handleBad = () => {
+//     setBad(bad + 1);
+//     setClick(allClick + 1);
+//   };
+
+//   return (
+//     // ...
+//     <>
+//       <Statistics
+//         good={good}
+//         neutral={neutral}
+//         bad={bad}
+//         allClick={allClick}
+//       ></Statistics>
+
+//       <button onClick={handleGood}>Good</button>
+//        <button onClick={handleNeutral}>Neutral</button>
+//       <button onClick={handleBad}>Bad</button>
+//     </>
+//   );
+// };
+// export default App;
+
+
+
+const StaticLine=(props)=>
+{ 
+  return (
+    <>
+      <p>{props.text} {props.quality}</p>
+    </>
+  );
+}
+
+
+import { useState } from "react";
 const App = () => {
   const [good, setGood] = useState(0);
   const [neutral, setNeutral] = useState(0);
   const [bad, setBad] = useState(0);
-  const [allClick,setClick]=useState([]);
 
-  const handleGood=()=>{
-    setGood(good+1);
-    setClick(allClick+1);
-  }
+  const handleGood = () => {
+    setGood(good + 1);
+    setClick(allClick + 1);
+  };
 
   const handleNeutral = () => {
     setNeutral(neutral + 1);
@@ -261,19 +312,21 @@ const App = () => {
   return (
     // ...
     <>
-      <Statistics
-        good={good}
-        neutral={neutral}
-        bad={bad}
-        allClick={allClick}
-      ></Statistics>
-      {/* <button onClick={() => setGood(good + 1)}>good</button>
-      <button onClick={() => setNeutral(neutral + 1)}>neutral</button>
-      <button onClick={() => setBad(bad + 1)}>bad</button> */}
       <button onClick={handleGood}>Good</button>
-       <button onClick={handleNeutral}>Neutral</button>
+      <button onClick={handleNeutral}>Neutral</button>
       <button onClick={handleBad}>Bad</button>
+      <StaticLine text={"good"} quality={good}></StaticLine>
+      <StaticLine text={"neutral"} quality={neutral}></StaticLine>
+      <StaticLine text={"bad"} quality={bad}></StaticLine>
+      <StaticLine text={"all"} quality={good + bad + neutral}></StaticLine>
+      <StaticLine
+        text={"average"}
+        quality={good+bad+neutral === 0 ? 0 : (good -bad) / good+bad+neutral}
+      ></StaticLine>
+
+      <StaticLine text={"positive"} quality={good + bad + neutral === 0 ? 0 : (good / (good + bad + neutral)) * 100 + " %"}></StaticLine>
     </>
   );
 };
 export default App;
+
