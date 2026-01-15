@@ -36,13 +36,6 @@
 
 // export default App;
 
-
-
-
-
-
-
-
 // const App = () => {
 //   const course = "Half Stack application development";
 //   const part1 = {
@@ -115,7 +108,6 @@
 //   );
 // };
 
-
 // const App = () => {
 //   const course = {
 //     name: "Half Stack application development",
@@ -152,35 +144,99 @@
 //   );
 // };
 
-// 
+//
 
-import { useState } from "react";
+// import { useState } from "react";
+
+// const App = () => {
+//   const [good, setGood] = useState(0);
+//   const [neutral, setNeutral] = useState(0);
+//   const [bad, setBad] = useState(0);
+
+//   const all = good + neutral + bad;
+
+//   return (
+//     <>
+//       <h1>give feedback</h1>
+
+//       <button onClick={() => setGood(good + 1)}>good</button>
+//       <button onClick={() => setNeutral(neutral + 1)}>neutral</button>
+//       <button onClick={() => setBad(bad + 1)}>bad</button>
+
+//       <h2>statistics</h2>
+
+//       <p>good {good}</p>
+//       <p>neutral {neutral}</p>
+//       <p>bad {bad}</p>
+//       <p>all {all}</p>
+//       <p>average {all === 0 ? 0 : (good - bad) / all}</p>
+//       <p>positive {all === 0 ? 0 : (good / all) * 100} %</p>
+//     </>
+//   );
+// };
+
+// export default App;
+
+// a proper place to define a component
+
+// Version 2: Destructuring props for cleaner and more readable code
+// good, neutral, bad are extracted from props at the function parameter level
+
+// const Statistics = ({ good, neutral, bad }) => {
+//   const all = good + neutral + bad;
+
+//   return (
+//     <>
+//       <h1>Statistics</h1>
+
+//       {/* Accessing values directly after destructuring */}
+//       <p>Good {good}</p>
+//       <p>Neutral {neutral}</p>
+//       <p>Bad {bad}</p>
+
+//       <p>All {all}</p>
+//       <p>Average {all === 0 ? 0 : (good - bad) / all}</p>
+//       <p>Positive {all === 0 ? 0 : (good / all) * 100} %</p>
+//     </>
+//   );
+// };
+
+// Version 1: Accessing values directly from the props object
+// props is a single object that contains all passed values
+
+const Statistics = (props) => {
+  const all = props.good + props.neutral + props.bad;
+
+  return (
+    <>
+      <h1>Statistics</h1>
+
+      {/* Accessing values using props.key */}
+      <p>Good {props.good}</p>
+      <p>Neutral {props.neutral}</p>
+      <p>Bad {props.bad}</p>
+
+      <p>All {all}</p>
+      <p>Average {all === 0 ? 0 : (props.good - props.bad) / all}</p>
+      <p>Positive {all === 0 ? 0 : (props.good / all) * 100} %</p>
+    </>
+  );
+};
 
 const App = () => {
   const [good, setGood] = useState(0);
   const [neutral, setNeutral] = useState(0);
   const [bad, setBad] = useState(0);
 
-  const all = good + neutral + bad;
-
   return (
+    // ...
     <>
-      <h1>give feedback</h1>
-
       <button onClick={() => setGood(good + 1)}>good</button>
       <button onClick={() => setNeutral(neutral + 1)}>neutral</button>
       <button onClick={() => setBad(bad + 1)}>bad</button>
 
-      <h2>statistics</h2>
-
-      <p>good {good}</p>
-      <p>neutral {neutral}</p>
-      <p>bad {bad}</p>
-      <p>all {all}</p>
-      <p>average {all === 0 ? 0 : (good - bad) / all}</p>
-      <p>positive {all === 0 ? 0 : (good / all) * 100} %</p>
+      <Statistics good={good} neutral={neutral} bad={bad}></Statistics>
     </>
   );
 };
-
 export default App;
