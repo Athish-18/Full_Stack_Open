@@ -30,6 +30,9 @@
 
 // export default App;
 
+// 
+
+
 import { useState } from "react";
 
 const App = () => {
@@ -45,29 +48,30 @@ const App = () => {
   ];
 
   const [selected, setSelected] = useState(0);
-  const [voted,setVoted]=useState(Array(anecdotes.length).fill(0));
-
+  const [voted, setVoted] = useState(Array(anecdotes.length).fill(0));
+  const[max_idx,setMax]=useState(0);
   const handleClick = () => {
     setSelected(Math.floor(Math.random() * anecdotes.length));
     //console.log(selected);
   };
 
-  const handleVote=()=>
-  {
-    const copy=[...voted];
-    copy[selected]+=1;
+  const handleVote = () => {
+    const copy = [...voted];
+    copy[selected] += 1;
     setVoted(copy);
-  }
-  
+    const max=Math.max(...copy);
+    setMax(copy.indexOf(max));
+    console.log(`anecdote is "${anecdotes[max_idx]}"`);
+  };
 
-  
-  
   return (
     <>
       <button onClick={handleClick}>Next Anecdote</button>
       <button onClick={handleVote}>Vote</button>
       <p>{anecdotes[selected]}</p>
-       <p>has {voted[selected]} votes</p>
+      <p>has {voted[selected]} votes</p>
+      <h2>Anecdote with most votes</h2>
+      <p>{anecdotes[max_idx]}</p>
     </>
   );
 };
