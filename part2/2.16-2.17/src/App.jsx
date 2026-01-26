@@ -1,28 +1,30 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import noteService from "./services/notes";
 import Notification from "./components/Notification.jsx";
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
-  const [findUser, setUser] = useState("");
-  const [NotificationMessage, setNotificationMessage] = useState(null);
+  const [findUser, setFindUser] = useState("");
+  const [notificationMessage, setNotificationMessage] = useState(null);
 
-  // Fetching data from server
-  // useEffect(() => {
-  //   axios.get("http://localhost:3001/persons").then((response) => {
-  //     setPersons(response.data);
-  //   });
-  // }, []);
-
+ // Fetch data from backend
   useEffect(() => {
-    noteService.getAll().then((response) => {
-      setPersons(response);
+    noteService.getAll().then((data) => {
+      setPersons(data);
     });
   }, []);
 
-  // 🔹 derived data (NOT inside handlers)
+  // useEffect(() => {
+  //   noteService.getAll().then((data) => {
+  //     console.log("DATA FROM BACKEND:", data);
+  //     console.log("IS ARRAY?", Array.isArray(data));
+  //     setPersons(data);
+  //   });
+  // }, []);
+
+  // Derived data
   const personsToShow =
     findUser === ""
       ? persons
@@ -45,7 +47,7 @@ const App = () => {
       if (ok) {
         const updatedPerson = {
           ...existingPerson,
-          phn: newNumber,
+          number: newNumber,
         };
 
         noteService
@@ -56,45 +58,39 @@ const App = () => {
                 p.id !== returnedPerson.id ? p : returnedPerson,
               ),
             );
+            setNotificationMessage(`Updated ${returnedPerson.name}`);
             setNewName("");
             setNewNumber("");
-            setNotificationMessage(`Updated ${returnedPerson.name}`);
-            setTimeout(() => {
-              setNotificationMessage(null);
-            }, 5000);
+            setTimeout(() => setNotificationMessage(null), 5000);
           })
-          .catch(error => {
-            console.log("Error updating the person");
-            setNotificationMessage(`Information of ${existingPerson.name} has already been removed from server`);
-            setTimeout(() => {
-              setNotificationMessage(null);
-            }, 5000);
-            setPersons(persons.filter(p => p.id !== existingPerson.id));
-             setNewName("");
-             setNewNumber("");
-
+          .catch(() => {
+            setNotificationMessage(
+              `Information of ${existingPerson.name} has already been removed from server`,
+            );
+            setPersons(persons.filter((p) => p.id !== existingPerson.id));
+            setNewName("");
+            setNewNumber("");
+            setTimeout(() => setNotificationMessage(null), 5000);
           });
       }
     } else {
       const newPerson = {
         name: newName,
-        phn: newNumber,
+        number: newNumber,
       };
 
       noteService.create(newPerson).then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
+        setNotificationMessage(`Added ${returnedPerson.name}`);
         setNewName("");
         setNewNumber("");
-        setNotificationMessage(`Added ${returnedPerson.name}`);
-        setTimeout(() => {
-          setNotificationMessage(null);
-        }, 5000);
+        setTimeout(() => setNotificationMessage(null), 5000);
       });
     }
   };
 
-  const deletPerson = (id, name) => {
-    const ok = window.confirm(`Delete ${name} ?`);
+  const deletePerson = (id, name) => {
+    const ok = window.confirm(`Delete ${name}?`);
 
     if (ok) {
       noteService.remove(id).then(() => {
@@ -103,59 +99,47 @@ const App = () => {
     }
   };
 
-  const handlePersonChange = (event) => {
-    setNewName(event.target.value);
-  };
+  // console.log("PERSONS STATE:", persons);
+  // console.log("PERSONS IS ARRAY?", Array.isArray(persons));
+  // console.log("PERSONS TO SHOW:", personsToShow);
+  // console.log("PERSONS TO SHOW IS ARRAY?", Array.isArray(personsToShow));
 
-  const handleNumberChange = (event) => {
-    setNewNumber(event.target.value);
-  };
-
-  const findPerson = (event) => {
-    setUser(event.target.value);
-  };
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={NotificationMessage} />
+      <Notification message={notificationMessage} />
 
       <h4>Filter shown with</h4>
-      <input value={findUser} onChange={findPerson} />
-      {/* <Filter findUser={findUser} findPerson={findPerson}></Filter> */}
+      <input value={findUser} onChange={(e) => setFindUser(e.target.value)} />
 
       <h3>Add a new</h3>
       <form onSubmit={handleSubmit}>
         <div>
-          name: <input value={newName} onChange={handlePersonChange} />
+          name:{" "}
+          <input value={newName} onChange={(e) => setNewName(e.target.value)} />
         </div>
         <div>
-          number: <input value={newNumber} onChange={handleNumberChange} />
+          number:{" "}
+          <input
+            value={newNumber}
+            onChange={(e) => setNewNumber(e.target.value)}
+          />
         </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
+        <button type="submit">add</button>
       </form>
-      {/* <Form
-        handleSubmit={handleSubmit}
-        handlePersonChange={handlePersonChange}
-        handleNumberChange={handleNumberChange}
-        newName={newName}
-        newNumber={newNumber}
-      ></Form> */}
 
       <h2>Numbers</h2>
       <ul>
         {personsToShow.map((person) => (
           <li key={person.id}>
-            {person.name} {person.phn}
-            <button onClick={() => deletPerson(person.id, person.name)}>
+            {person.name} {person.number}
+            <button onClick={() => deletePerson(person.id, person.name)}>
               Delete
             </button>
           </li>
         ))}
       </ul>
-      {/* <Person personsToShow={personsToShow}></Person> */}
     </div>
   );
 };
