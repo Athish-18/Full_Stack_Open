@@ -90,12 +90,10 @@ app.post("/api/persons", (req, res) => {
   res.json(person);
 });
 
-/* ------------------ SPA FALLBACK (IMPORTANT FOR REACT ROUTING) ------------------ */
-
-app.get("*", (req, res) => {
+// SPA fallback (Express 5 compatible)
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
-
 /* ------------------ SERVER ------------------ */
 
 const PORT = process.env.PORT || 3001;
