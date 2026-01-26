@@ -1,97 +1,82 @@
-const morgan = require("morgan");
 const express = require("express");
+const morgan = require("morgan");
+const path = require("path");
+
 const app = express();
 
+/* ------------------ DATA ------------------ */
+
 let persons = [
-  {
-    id: "1",
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: "2",
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: "3",
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: "4",
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
+  { id: "1", name: "Arto Hellas", number: "040-123456" },
+  { id: "2", name: "Ada Lovelace", number: "39-44-5323523" },
+  { id: "3", name: "Dan Abramov", number: "12-43-234345" },
+  { id: "4", name: "Mary Poppendieck", number: "39-23-6423122" },
 ];
 
-const generateid = () => {
-  return String(Math.floor(Math.random() * 10000));
-};
+/* ------------------ UTILS ------------------ */
 
-app.use(express.json()); //middleware to parse json body --convert to js object
+const generateid = () => String(Math.floor(Math.random() * 100000));
 
-//morgan middleware for logging
+/* ------------------ MIDDLEWARE ------------------ */
 
+app.use(express.json());
+
+// Morgan logging
 morgan.token("body", (req) => JSON.stringify(req.body));
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body"),
 );
-app.use(morgan("tiny"));
 
-app.get("/", (request, response) => {
-  response.send("<h1>I m working </h1>");
+/* ------------------ STATIC FRONTEND (3.11) ------------------ */
+
+// Serve frontend build
+app.use(express.static(path.join(__dirname, "dist")));
+
+/* ------------------ API ROUTES ------------------ */
+
+app.get("/api/persons", (req, res) => {
+  res.json(persons);
 });
 
-app.get("/api/persons", (request, response) => {
-  response.json(persons); //response with json format
+app.get("/info", (req, res) => {
+  res.send(`
+    <p>Phonebook has info for ${persons.length} people</p>
+    <p>${new Date()}</p>
+  `);
 });
 
-app.get("/info", (request, response) => {
-  response.send(`<p>Phonebook has info for ${persons.length} people <p>
-                 <p>${new Date()}</p>`);
-});
-
-app.get("/api/persons/:id", (request, response) => {
-  const id = request.params.id;
-  const person = persons.find((p) => p.id === id);
+app.get("/api/persons/:id", (req, res) => {
+  const person = persons.find((p) => p.id === req.params.id);
 
   if (person) {
-    response.json(person);
-    console.log("logged");
+    res.json(person);
   } else {
-    response.status(404).end();
-    console.log("error logged");
+    res.status(404).end();
   }
 });
 
 app.delete("/api/persons/:id", (req, res) => {
-  const id = req.params.id;
-  persons = persons.filter((p) => p.id !== id);
-
+  persons = persons.filter((p) => p.id !== req.params.id);
   res.status(204).end();
 });
 
 app.post("/api/persons", (req, res) => {
   const body = req.body;
 
-  // if(!body.name || !body.number)
-  // {
-  //   return res.status(400).json({
-  //       error:"name missing",
-  //   })
-  // }
-
-  const name = body.name; //
-  if (persons.find((p) => p.name == name)) {
+  // Validation (3.10)
+  if (!body.name || !body.number) {
     return res.status(400).json({
-      error: "name must be unique",
+      error: "name or number missing",
     });
   }
 
-  if (!body.name || !body.number) {
+  const nameExists = persons.some(
+    (p) => p.name.toLowerCase() === body.name.toLowerCase(),
+  );
+
+  if (nameExists) {
     return res.status(400).json({
-      error: "details missing",
+      error: "name must be unique",
     });
   }
 
@@ -105,7 +90,15 @@ app.post("/api/persons", (req, res) => {
   res.json(person);
 });
 
+/* ------------------ SPA FALLBACK (IMPORTANT FOR REACT ROUTING) ------------------ */
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
+/* ------------------ SERVER ------------------ */
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on PORT ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
