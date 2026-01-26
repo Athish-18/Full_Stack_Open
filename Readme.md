@@ -44,4 +44,6 @@ sequenceDiagram
 
     Note right of Browser: JavaScript updates UI without page reload
 
-
+Exercise--> 3.10 --> Deploying backend on render
+Deployed backend:
+https://phonebook-backend-pydz.onrender.com/api/persons
