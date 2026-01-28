@@ -6,6 +6,9 @@ const app = express();
 
 /* ---------- MIDDLEWARE ---------- */
 
+app.use(express.json());
+app.use(express.static("dist"));
+
 const requestLogger = (request, response, next) => {
   console.log("Method:", request.method);
   console.log("Path:  ", request.path);
@@ -14,18 +17,15 @@ const requestLogger = (request, response, next) => {
   next();
 };
 
-app.use(express.json());
 app.use(requestLogger);
-app.use(express.static("dist"));
 
 /* ---------- ROUTES ---------- */
 
 /* GET all persons */
-app.get("/api/persons", (request, response) => {
-  Person.find({}).then((persons) => {
-    response.json(persons);
-  })
-  .catch(error=>next(error));
+app.get("/api/persons", (request, response, next) => {
+  Person.find({})
+    .then((persons) => response.json(persons))
+    .catch((error) => next(error));
 });
 
 /* GET one person */
@@ -41,64 +41,64 @@ app.get("/api/persons/:id", (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.get("/info",(req,res,next)=>{
-  Person.countDocuments({}).then(count=>{
-    res.send(`<p>Phonebook has info for ${count} people </p>
-      <p>${new Date()}</p>`);
-  })
-  .catch(error=>next(error));
-})
+/* INFO */
+app.get("/info", (request, response, next) => {
+  Person.countDocuments({})
+    .then((count) => {
+      response.send(
+        `<p>Phonebook has info for ${count} people</p>
+         <p>${new Date()}</p>`,
+      );
+    })
+    .catch((error) => next(error));
+});
 
+/* ADD person */
+app.post("/api/persons", (request, response, next) => {
+  const { name, number } = request.body;
 
-/* ADD a person */
-app.post("/api/persons", (request, response) => {
-  const body = request.body;
-
-  if (!body.name || !body.number) {
+  if (!name || !number) {
     return response.status(400).json({
       error: "name or number missing",
     });
   }
 
-  const person = new Person({
-    name: body.name,
-    number: body.number,
-  });
+  const person = new Person({ name, number });
 
-  person.save().then((savedPerson) => {
-    response.json(savedPerson);
-  });
-});
-
-/* DELETE a person */
-app.delete("/api/persons/:id", (request, response, next) => {
-  Person.findByIdAndDelete(request.params.id)
-    .then(() => {
-      response.status(204).end();
-    })
+  person
+    .save()
+    .then((savedPerson) => response.json(savedPerson))
     .catch((error) => next(error));
 });
 
-app.put("/api/persons/:id",(request,response,next)=>
-{
-  const body=request.body;
+/* UPDATE person */
+app.put("/api/persons/:id", (request, response, next) => {
+  const { name, number } = request.body;
 
-  const person={
-    name:body.name,
-    number:body.number,
-  };
+  Person.findByIdAndUpdate(
+    request.params.id,
+    { name, number },
+    {
+      new: true,
+      runValidators: true,
+      context: "query",
+    },
+  )
+    .then((updatedPerson) => response.json(updatedPerson))
+    .catch((error) => next(error));
+});
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
-    .then((updatedPerson) => {
-      response.json(updatedPerson);
-    })
+/* DELETE person */
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
+    .then(() => response.status(204).end())
     .catch((error) => next(error));
 });
 
 /* ---------- UNKNOWN ENDPOINT ---------- */
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: "unknown endpoint" });
+  response.status(404).json({ error: "unknown endpoint" });
 };
 
 app.use(unknownEndpoint);
@@ -112,6 +112,10 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).json({ error: "malformatted id" });
   }
 
+  if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
+  }
+
   next(error);
 };
 
@@ -119,7 +123,7 @@ app.use(errorHandler);
 
 /* ---------- SERVER ---------- */
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);//3.18 done
+  console.log(`Server running on port ${PORT}`);
 });

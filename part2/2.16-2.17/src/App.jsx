@@ -9,7 +9,7 @@ const App = () => {
   const [findUser, setFindUser] = useState("");
   const [notificationMessage, setNotificationMessage] = useState(null);
 
- // Fetch data from backend
+  // Fetch data from backend
   useEffect(() => {
     noteService.getAll().then((data) => {
       setPersons(data);
@@ -79,13 +79,23 @@ const App = () => {
         number: newNumber,
       };
 
-      noteService.create(newPerson).then((returnedPerson) => {
-        setPersons(persons.concat(returnedPerson));
-        setNotificationMessage(`Added ${returnedPerson.name}`);
-        setNewName("");
-        setNewNumber("");
-        setTimeout(() => setNotificationMessage(null), 5000);
-      });
+      noteService
+        .create(newPerson)
+        .then((returnedPerson) => {
+          setPersons(persons.concat(returnedPerson));
+          setNotificationMessage(`Added ${returnedPerson.name}`);
+          setNewName("");
+          setNewNumber("");
+          setTimeout(() => setNotificationMessage(null), 5000);
+        })
+        .catch((error) => {
+          const message = error.response?.data?.error || "Something went wrong";
+
+          setNotificationMessage(message);
+          setTimeout(() => setNotificationMessage(null), 5000);
+          setNewName("");
+          setNewNumber("");
+        });
     }
   };
 
@@ -103,7 +113,6 @@ const App = () => {
   // console.log("PERSONS IS ARRAY?", Array.isArray(persons));
   // console.log("PERSONS TO SHOW:", personsToShow);
   // console.log("PERSONS TO SHOW IS ARRAY?", Array.isArray(personsToShow));
-
 
   return (
     <div>
