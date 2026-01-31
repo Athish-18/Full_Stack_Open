@@ -1,6 +1,13 @@
-const dummy=(blogs)=>
+// const dummy=(blogs)=>
+// {
+//   return 1;
+// }
+
+// module.exports={dummy};
+
+const totalLikes=(blogs)=>
 {
-  return 1;
+  return blogs.reduce((sum,blog)=>(sum+blog.likes),0)
 }
 
-module.exports={dummy};
+module.exports={totalLikes};
